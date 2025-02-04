@@ -25,7 +25,21 @@ See ![Diagram](../diagrams/kubeadm-infrastructure.drawio.svg)
 
 1. These tasks need to be completed on **BOTH** LBs
 2. Run ```sudo apt update && sudo apt upgrade -y```
-3. Install NGINX & keepalived packages
+3. Install support packages
 ```shell
-sudo apt install 
+sudo apt install curl wget git -y
+```
+4. Install NGINX & keepalived packages
+  1. At this time of writing this, application versions were:
+    1. NGINX = 1.26.2
+    2. Keepalived = 2.2.8
+```shell
+sudo apt install nginx keepalived -y
+sudo apt mark-hold nginx keepalived
+```
+5. Git clone abiwot-kubeadm
+```shell
+mkdir -p $HOME/projects/k8s
+cd $HOME/projects/k8s
+git clone https://github.com/abiwot/abiwot-kubeadm.git
 ```
