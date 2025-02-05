@@ -48,7 +48,7 @@ This is also important when running in a degraded control-plane state (nodes are
 
 #### Storage Node Availability
 
-This deployment uses Rook-Ceph (Rook is the orchestrator.  Ceph is the distributed storage.).  For the RawBlockDevices (RBD), they are setup to hold 3 replicas.  This means each RBD pool has 3 copies of your data.  So you can lose 1 node and still have your data safe.
+This deployment uses Rook-Ceph (Rook is the orchestrator.  Ceph is the distributed storage.).  For the RadosBlockDevices (RBD), they are setup to hold 3 replicas.  This means each RBD pool has 3 copies of your data.  So you can lose 1 node and still have your data safe.
 You want to keep this in mind when designing your storage node placement within AZ/FD.  Very similar logic as to the control-plane node placement.
 
 Would recommend 4+ storage nodes for any production deployment, from a safety point of view.  You may need to consider more nodes based on workload I/O.

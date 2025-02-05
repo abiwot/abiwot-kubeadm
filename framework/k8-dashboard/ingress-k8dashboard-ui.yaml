@@ -15,7 +15,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: k8clst100-k8dashboard.abiwot-lab.com
+  - host: cdak8clst100-k8dashboard.abiwot-lab.com
     http:
       paths:
       - path: /
