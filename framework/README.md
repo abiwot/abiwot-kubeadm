@@ -5,7 +5,7 @@ These are the different components that make up this K8s deployment.  Below is a
 ### Component Matrix Compatability
 
 | Component | Method | App ver | Helm ver |
-|:---------:|:------:|:-------:|:--------:|
+|:----------|:-------|:--------|:---------|
 | containerd (CRI) | APT | 1.7.24 | n/a |
 | kubelet | APT | 1.32.1-1.1 | n/a |
 | kubeadm | APT | 1.32.1-1.1 |n/a |

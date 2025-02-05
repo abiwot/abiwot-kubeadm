@@ -1,14 +1,14 @@
-## K8s API Aggregation Layer (load-balancer)
+# K8s API Aggregation Layer (load-balancer)
 
 As mentioned before, you need to have an external (from the K8s cluster perspective) that is responsible to be the aggregation layer for K8s inbound communications and ingress to exposed services.
 
 This deployment will depict a cluster of NGINX load-balancers.  The configs provided are purely for convience and not an example of a production level NGINX LB deployment.
 
-### Load-balancer Design Layout
+## Load-balancer Design Layout
 
 See ![Diagram](../diagrams/kubeadm-infrastructure.drawio.svg)
 
-### System Requirements
+## System Requirements
 
 - OS
   - Ubuntu 24.04
@@ -19,27 +19,89 @@ See ![Diagram](../diagrams/kubeadm-infrastructure.drawio.svg)
 - DNS Records
   - See [Diagram](#load-balancer-design-layout).  The DNS Entries chart has the necessary records needed.
 
-### Load-balancer Build Configuration
+## Load-balancer Build Configuration
 
-#### Package Installations
+### Package Installations
 
 1. These tasks need to be completed on **BOTH** LBs
 2. Run ```sudo apt update && sudo apt upgrade -y```
 3. Install support packages
+
 ```shell
 sudo apt install curl wget git -y
 ```
+
 4. Install NGINX & keepalived packages
-  1. At this time of writing this, application versions were:
-    1. NGINX = 1.26.2
-    2. Keepalived = 2.2.8
+    1. At this time of writing this, application versions were:
+        1. NGINX = 1.26.2
+        2. Keepalived = 2.2.8
+
 ```shell
 sudo apt install nginx keepalived -y
 sudo apt mark-hold nginx keepalived
 ```
+
 5. Git clone abiwot-kubeadm
+
 ```shell
 mkdir -p $HOME/projects/k8s
 cd $HOME/projects/k8s
 git clone https://github.com/abiwot/abiwot-kubeadm.git
+```
+
+### Keepalived Configuration
+
+**Ensure each LB node gets their corresponding keepalived config file**
+
+1. Navigate to $HOME/projects/k8s/abiwot-kubeadm/load-balancer/keepalived/
+2. Copy keepalived.conf to /etc/keepalived/
+3. Set kernel parameters (see [Kernel Notes](#kernel-notes)) for details
+4. Restart keepalived service
+
+```shell
+cd $HOME/projects/k8s/abiwot-kubeadm/load-balancer/keepalived/<corresponding host folder>
+sudo cp keepalived.conf /etc/keepalived/
+```
+
+```shell
+sudo tee -a /etc/sysctl.conf <<EOF
+
+# Keepalived VRRP Tuning
+net.ipv4.ip_nonlocal_bind=1
+net.ipv4.conf.all.arp_ignore=1
+net.ipv4.conf.all.arp_announce=2
+net.ipv4.conf.ens192.arp_ignore=1
+net.ipv4.conf.ens192.arp_announce=2
+
+EOF
+
+```
+
+```shell
+sudo sysctl -p
+sudo systemctl restart keepalived
+sudo systemctl status keepalived
+```
+
+#### Kernel Notes
+
+Brief explanation of what each of the kernel parameters are for.
+
+|Setting|Purpose|
+|:------|:------|
+|*ip_nonlocal_bind=1*|Allows services to bind to the vIP immediately|
+|*arp_ignore=1*|Prevents BACKUP stated system from responding to ARP for vIP|
+|*arp_announce=2*|Ensures ARP announcements use the correct interface|
+
+### NGINX Configurations
+
+1. Make NGINX configuration folder structure
+2. Copy root NGINX configuration file
+3. Copy K8s NGINX configuration file
+
+```shell
+sudo mkdir -p /etc/nginx/conf.d/k8s/http
+cd $HOME/projects/k8s/abiwot-kubeadm/load-balancer/nginx
+sudo cp nginx.conf /etc/nginx/
+sudo cp https_k8clst100.conf /etc/nginx/conf.d/k8s/http/
 ```
