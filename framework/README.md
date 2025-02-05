@@ -30,8 +30,8 @@ The main components that must be installed for minimal functionality are:
 - kubeadm
 - tigera-calico
 
-If you are using this deployment for testing/learning, then these 2 components are the foundational base to learn from.
+If you are using this deployment for testing/learning, then these 2 components are the foundational base to learn from
 
 ### System Requirements
 
-See [Prequisites](../Prerequisites.md#system-requirements)
+See [Prequisites](../prerequisites.md#system-requirements)

@@ -1,0 +1,41 @@
+# helm-ingress-nginx-override-values.yaml
+---
+controller:
+  replicaCount: 2
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - '{{ include "ingress-nginx.name" . }}'
+          - key: app.kubernetes.io/instance
+            operator: In
+            values:
+            - '{{ .Release.Name }}'
+          - key: app.kubernetes.io/component
+            operator: In
+            values:
+            - controller
+        topologyKey: kubernetes.io/hostname
+  service:
+    type: NodePort
+    nodePorts:
+      http: 30080  # port used to send HTTP traffic from K8s LB to the Ingress Controller
+      https: 30443 # port used to send HTTPS traffic from K8s LB to the Ingress Controller
+      tcp:
+      # Uncomment for TCP streaming ports used for 3rd party
+        #<exposed port>: <host port>
+        #8080: 32808
+        #31672: 31672
+        #31671: 31671
+        #31674: 31674
+        #31673: 31673
+tcp:
+# Uncomment the corresponding namespace:port the cluster will use
+  #<port>: "<namespace/service name>:<port>"
+  #31672: "ns-commerce01/rabbitmq-cluster01:5672" #insecure internal is not used
+
+...

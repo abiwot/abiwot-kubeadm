@@ -1,0 +1,29 @@
+# ingress-grafana-ui.yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 10m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: 60s
+    nginx.ingress.kubernetes.io/proxy-send-timeout: 60s
+  name: grafana-ui-nodeport-expose
+  namespace: monitoring
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: cdak8clst100-monitoring-grafana.abiwot-lab.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kube-prometheus-grafana
+            port:
+              name: http-web
+...

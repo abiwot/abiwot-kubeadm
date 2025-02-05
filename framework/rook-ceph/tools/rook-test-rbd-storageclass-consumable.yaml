@@ -1,0 +1,77 @@
+# rook-test-all-storageclass-consumable.yaml
+#
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rook-storageclass-consumer-pv-claim-rbd-ssd
+  namespace: default
+spec:
+  storageClassName: rookceph-rbd-ssd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+...
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rook-storageclass-consumer-pv-claim-rbd-hdd
+  namespace: default
+spec:
+  storageClassName: rookceph-rbd-hdd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+...
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: rook-storageclass-consumer-pv-claim-cfs-hdd
+#   namespace: default
+# spec:
+#   storageClassName: rookceph-cfs-hdd
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 2Gi
+# ...
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rook-storageclass-consumer
+  namespace: default
+spec:
+  containers:
+  - name: rook-tester
+    image: alpine
+    command:
+      - sleep
+      - "infinity"
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - name: rook-storageclass-consumer-pv-claim-rbd-ssd
+        mountPath: /mnt/pv/rook-storageclass-consumer-pv-claim-rbd-ssd
+      - name: rook-storageclass-consumer-pv-claim-rbd-hdd
+        mountPath: /mnt/pv/rook-storageclass-consumer-pv-claim-rbd-hdd
+      # - name: rook-storageclass-consumer-pv-claim-cfs-hdd
+      #   mountPath: /mnt/pv/rook-storageclass-consumer-pv-claim-cfs-hdd
+  volumes:
+    - name: rook-storageclass-consumer-pv-claim-rbd-ssd
+      persistentVolumeClaim:
+        claimName: rook-storageclass-consumer-pv-claim-rbd-ssd
+    - name: rook-storageclass-consumer-pv-claim-rbd-hdd
+      persistentVolumeClaim:
+        claimName: rook-storageclass-consumer-pv-claim-rbd-hdd
+    # - name: rook-storageclass-consumer-pv-claim-cfs-hdd
+    #   persistentVolumeClaim:
+    #     claimName: rook-storageclass-consumer-pv-claim-cfs-hdd
+  restartPolicy: Never
+...

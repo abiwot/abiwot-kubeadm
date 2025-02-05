@@ -1,0 +1,19 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: JoinConfiguration
+caCertPath: /etc/kubernetes/pki/ca.crt
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: #<FQDN of external LB of K8s + ':<bind port of API - default(6443)>'
+    token: <initBootstrapToken> # Created to allow control-plane and worker nodes join
+    unsafeSkipCAVerification: true
+  tlsBootstrapToken: <initBootstrapToken> # Created to allow control-plane and worker nodes join
+nodeRegistration:
+  criSocket: unix:///var/run/containerd/containerd.sock
+  imagePullPolicy: Always
+  taints: null
+patches:
+  directory: /etc/kubernetes/patches/
+timeouts:
+  discovery: 5m0s
+...

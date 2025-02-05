@@ -1,0 +1,46 @@
+# helm-kube-prome-stack-override-values.yaml
+#
+---
+#kubeTargetVersionOverride: 1.32.1
+
+kubeEtcd:
+  service:
+    enabled: false
+    #port: 8443
+    #targetPort: 8443
+    #selector:
+      #app: kube-rbac-proxy
+  serviceMonitor:
+    #proxyUrl: "https://kube-rbac-proxy.kube-system.svc.cluster.local:8443/metrics"
+    scheme: https
+    insecureSkipVerify: true
+    #serverName: localhost
+    #caFile: /etc/prometheus/secrets/etcd-client-cert/etcd-ca
+    #certFile: /etc/prometheus/secrets/etcd-client-cert/etcd-client
+    #keyFile: /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
+    #caFile: /etc/prometheus/secrets/abiwot-cert/abiwot-ca
+    #certFile: /etc/prometheus/secrets/abiwot-cert/abiwot-client
+    #keyFile: /etc/prometheus/secrets/abiwot-cert/abiwot-client-key
+    port: https
+    selector:
+      matchLabels:
+        app: kube-rbac-proxy-etcd
+
+kubeProxy:
+  service:
+    enabled: false
+  serviceMonitor:
+    https: true
+    #scheme: https
+    #insecureSkipVerify: true
+    port: https
+    selector:
+      matchLabels:
+        app: kube-rbac-proxy-kube-proxy
+
+#prometheus:
+  #prometheusSpec:
+    #hostNetwork: true
+    #secrets:
+      #- etcd-client-cert
+      #- abiwot-cert

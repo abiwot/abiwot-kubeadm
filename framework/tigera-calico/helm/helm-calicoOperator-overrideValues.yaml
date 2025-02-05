@@ -1,0 +1,17 @@
+# helm-calicoOperator-overrideValues.yaml
+---
+installation:
+  enabled: true
+  cni:
+    type: Calico
+  calicoNetwork:
+    bgp: Disabled
+    ipPools:
+      - cidr: <pod subnet> #pod CIDR set in K8s ClusterConfiguration
+        blockSize: <pod subnet mask bits> # int32 size of the IP block sizes to allocate
+        encapsulation: VXLAN
+
+apiServer:
+  enabled: true
+
+...

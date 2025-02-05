@@ -1,0 +1,56 @@
+#kube-rbac-proxy-daemonset-etcd.yaml
+#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kube-rbac-proxy-etcd
+  name: kube-rbac-proxy-etcd
+  namespace: kube-system
+spec:
+  ports:
+  - name: https
+    port: 50381
+    targetPort: https
+  selector:
+    app: kube-rbac-proxy-etcd
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-rbac-proxy-etcd
+  namespace: kube-system
+  labels:
+    app: kube-rbac-proxy-etcd
+spec:
+  selector:
+    matchLabels:
+      app: kube-rbac-proxy-etcd
+  template:
+    metadata:
+      labels:
+        app: kube-rbac-proxy-etcd
+    spec:
+      securityContext:
+        runAsUser: 65532
+      serviceAccountName: kube-rbac-proxy
+      containers:
+      - name: kube-rbac-proxy-etcd
+        image: quay.io/brancz/kube-rbac-proxy:v0.18.2
+        args:
+        - "--secure-listen-address=0.0.0.0:50381"
+        - "--upstream=http://127.0.0.1:2381/"
+        - "--v=10"
+        ports:
+        - containerPort: 50381
+          name: https
+        securityContext:
+          allowPrivilegeEscalation: false
+      hostNetwork: true
+      tolerations:
+        - key: "node-role.kubernetes.io/control-plane"
+          operator: "Exists"
+          effect: "NoSchedule"
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""

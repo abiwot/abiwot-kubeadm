@@ -1,0 +1,7 @@
+# helm-rook-ceph-override-values.yaml
+#
+---
+csi:
+  csiAddons:
+    enabled: true
+...

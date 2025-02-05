@@ -1,0 +1,11 @@
+# /etc/kubernetes/admission-control-config.yaml
+---
+apiVersion: apiserver.config.k8s.io/v1
+kind: AdmissionConfiguration
+plugins:
+  - name: EventRateLimit
+    path: /etc/kubernetes/eventratelimit-server-namespace-user.yaml
+  - name: DefaultAdmissionConfig
+    configuration:
+      timeoutSeconds: 150
+...

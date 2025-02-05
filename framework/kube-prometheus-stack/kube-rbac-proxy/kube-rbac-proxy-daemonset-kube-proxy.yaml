@@ -1,0 +1,86 @@
+#kube-rbac-proxy-daemonset-kube-proxy.yaml
+#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kube-rbac-proxy-kube-proxy
+  name: kube-rbac-proxy-kube-proxy
+  namespace: kube-system
+spec:
+  ports:
+  - name: https
+    port: 50249
+    targetPort: https
+  selector:
+    app: kube-rbac-proxy-kube-proxy
+...
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-rbac-proxy-kube-proxy
+  namespace: kube-system
+  labels:
+    app: kube-rbac-proxy-kube-proxy
+spec:
+  selector:
+    matchLabels:
+      app: kube-rbac-proxy-kube-proxy
+  template:
+    metadata:
+      labels:
+        app: kube-rbac-proxy-kube-proxy
+    spec:
+      securityContext:
+        runAsUser: 65532
+      serviceAccountName: kube-rbac-proxy
+      containers:
+      - name: kube-rbac-proxy-kube-proxy
+        image: quay.io/brancz/kube-rbac-proxy:v0.18.1
+        args:
+        - "--secure-listen-address=0.0.0.0:50249"
+        - "--upstream=http://localhost:10249/"
+        #- "--client-ca-file=/etc/ssl/certs/abiwot/abiwot-fullchain.pem"
+        #- "--upstream-ca-file=/etc/ssl/certs/abiwot/abiwot-fullchain.pem"
+        # - "--tls-cert-file=/etc/ssl/certs/abiwot/abiwot-fullchain.pem"
+        # - "--tls-private-key-file=/etc/ssl/certs/abiwot/abiwot-key.pem"
+        - "--v=10"
+        ports:
+        - containerPort: 50249
+          name: https
+        securityContext:
+          allowPrivilegeEscalation: false
+        volumeMounts:
+          - name: cacerts
+            mountPath: "/etc/ssl/certs"
+            readOnly: true
+          - name: abiwot-certs
+            mountPath: "/etc/ssl/certs/abiwot"
+            readOnly: true
+      volumes:
+      - name: abiwot-certs
+        secret:
+          secretName: kube-rbac-proxy-abiwot
+      - name: cacerts
+        secret:
+          secretName: kube-rbac-proxy-cacrt
+      hostNetwork: true
+      tolerations:
+        - key: "node-role.kubernetes.io/control-plane"
+          operator: "Exists"
+          effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/control-plane
+                  operator: Exists
+              - matchExpressions:
+                - key: node-role.kubernetes.io/worker
+                  operator: In
+                  values:
+                    - "true"
+...

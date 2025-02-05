@@ -69,6 +69,8 @@ The LB needs to be configured prior to any K8s nodes being initialized.
 
 This project is not intended to provide production level instructions on setting up a LB cluster.  There are configs on how to setup/configure a basic internal LB cluster, for the purpose of this deployment.
 
+See [load-balancer-README](load-balancer/README.md)
+
 ### DNS Records (internal)
 
 There are DNS records required prior to deployment.  These DNS records are for internal (not public facing) intra-node communications and ability to expose some UI/services externally from the K8s cluster.

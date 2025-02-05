@@ -1,0 +1,28 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: 10m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: 60s
+    nginx.ingress.kubernetes.io/proxy-send-timeout: 60s
+  name: k8-dashboard-ui-nodeport-expose
+  namespace: kubernetes-dashboard
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: k8clst100-k8dashboard.abiwot-lab.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kubernetes-dashboard-kong-proxy
+            port:
+              number: 443
+...

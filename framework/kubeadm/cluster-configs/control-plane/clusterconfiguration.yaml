@@ -1,0 +1,135 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: InitConfiguration
+bootstrapTokens:
+  - groups:
+    - system:bootstrappers:kubeadm:default-node-token
+    token: <initBootstrapToken> # Created to allow control-plane and worker nodes join
+    description: "control-plane addition"
+    ttl: 1h0m0s
+    usages:
+    - signing
+    - authentication
+localAPIEndpoint:
+  advertiseAddress: #<IP of local node>
+  bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///var/run/containerd/containerd.sock
+timeouts:
+  controlPlaneComponentHealthCheck: 4m0s
+  discovery: 5m0s
+  etcdAPICall: 2m0s
+  kubeletHealthCheck: 4m0s
+  kubernetesAPICall: 1m0s
+  tlsBootstrap: 5m0s
+  upgradeManifests: 5m0s
+...
+---
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: ClusterConfiguration
+apiServer:
+  extraArgs:
+    - name: "enable-admission-plugins"
+      value: "AlwaysPullImages,EventRateLimit,NodeRestriction"
+    - name: "disable-admission-plugins"
+      value: "DenyServiceExternalIPs" #CIS 1.2.3
+    - name: "admission-control-config-file"
+      value: "/etc/kubernetes/admission-control-config.yaml"
+    - name: "profiling"
+      value: "false" #CIS 1.2.15
+    - name: "request-timeout"
+      value: "150s" #CIS 1.2.20
+    - name: "audit-policy-file"
+      value: "/etc/kubernetes/audit-policy-global.yaml"
+    - name: "audit-log-path"
+      value: "/var/log/kubernetes/audit/audit.log"
+    - name: "audit-log-maxage"
+      value: "30"
+    - name: "audit-log-maxbackup"
+      value: "10"
+    - name: "audit-log-maxsize"
+      value: "100"
+    - name: "encryption-provider-config"
+      value: "/etc/kubernetes/enc/encryption-config.yaml" #CIS 1.2.27 - 1.2.28
+    - name: "max-requests-inflight"
+      value: "1500"
+    - name: "max-mutating-requests-inflight"
+      value: "500"
+    - name: "watch-cache-sizes"
+      value: "deployments#1000,pods#5000"
+  extraVolumes:
+      - name: "admissioncontrolconfig"
+        hostPath: "/etc/kubernetes/admission-control-config.yaml"
+        mountPath: "/etc/kubernetes/admission-control-config.yaml"
+        pathType: File
+        readOnly: true
+      - name: "eventratelimit"
+        hostPath: "/etc/kubernetes/eventratelimit-server-namespace-user.yaml"
+        mountPath: "/etc/kubernetes/eventratelimit-server-namespace-user.yaml"
+        readOnly: true
+        pathType: File
+      - name: "audit"
+        hostPath: "/etc/kubernetes/audit-policy-global.yaml"
+        mountPath: "/etc/kubernetes/audit-policy-global.yaml"
+        readOnly: true
+        pathType: File
+      - name: "audit-log"
+        hostPath: "/var/log/kubernetes/audit/"
+        mountPath: "/var/log/kubernetes/audit/"
+        readOnly: false
+        pathType: "DirectoryOrCreate"
+      - name: "enc" #CIS 1.2.27 - 1.2.28
+        hostPath: "/etc/kubernetes/enc/encryption-config.yaml"
+        mountPath: "/etc/kubernetes/enc/encryption-config.yaml"
+        readOnly: true
+        pathType: File
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager:
+  extraArgs:
+    - name: "node-cidr-mask-size"
+      value: #<networking.podSubnet mask bits int32>
+    - name: "authorization-always-allow-paths"
+      value: "/healthz,/livez,/readyz,/metrics"
+dns: {}
+etcd: {}
+imageRepository: registry.k8s.io
+kubernetesVersion: #<exact version of K8s running>
+controlPlaneEndpoint: #<FQDN of external LB of K8s + ':<bind port of API - default(6443)>'
+networking:
+  serviceSubnet: #<CIDR used for K8s services>
+  podSubnet: #<CIDR used for K8s pods>
+...
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd
+containerRuntimeEndpoint: "unix:///var/run/containerd/containerd.sock"
+#
+# Protection for K8s host of running out of resources and possible kernel panic
+# total host resources - (systemReserved + kubeReserved) = allocatble resources
+systemReserved:                             # Reserved resources for host OS processes
+  cpu: "1000m"
+  memory: "2048Mi"
+  ephemeral-storage: "1Gi"
+systemReservedCgroup: "/system.slice"       # cgroup parent process for OS processes (systemd-cgtop --recursive=true)
+#kubeReserved:                               # Reserved resources for K8s system components
+#  cpu: "500m"
+#  memory: "512Mi"
+#  ephemeral-storage: "1Gi"
+#kubeReservedCgroup: "/kubepods.slice"       # cgroup parent for K8s component processes (systemd-cgtop --recursive=true)
+enforceNodeAllocatable:                     # Ensure node allocatable are enforced
+  - "system-reserved"
+#  - "kube-reserved"
+  - "pods"
+evictionPressureTransitionPeriod: "120s"    # Wait X time before transitioning out of presssure state
+evictionSoft:                               # Try to evict pods once meet combined with grace period
+  memory.available: "768Mi"                 # If <X memory, start the grace period clock to evict
+  nodefs.available: "8%"                    # If <X storage (/var/lib/kubelet/), start the grace period clock to evict
+evictionSoftGracePeriod:                    # Period to wait to evict
+  memory.available: "60s"
+  nodefs.available: "60s"
+evictionHard:                               # Immediately evict pods
+  memory.available: "500Mi"                 # Evict pods when available memory drops below 200 MiB
+  nodefs.available: "5%"                    # Evict pods when node disk space drops below 5%
+...

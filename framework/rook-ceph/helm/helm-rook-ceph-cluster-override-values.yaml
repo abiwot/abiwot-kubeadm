@@ -1,0 +1,232 @@
+# helm-rook-ceph-cluster-override_values.yaml
+#
+---
+# Installs a debugging toolbox deployment
+toolbox:
+  # -- Enable Ceph debugging pod deployment. See [toolbox](../Troubleshooting/ceph-toolbox.md)
+  enabled: true
+
+# -- Cluster configuration.
+cephClusterSpec:
+  # enable the crash collector for ceph daemon crash collection
+  crashCollector:
+    daysToRetain: 15
+  placement:
+    all: # all services placed on nodes with 'rook-node'
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: role-storage
+                operator: In
+                values:
+                - rook-node
+      # podAffinity:
+      # podAntiAffinity:
+      # topologySpreadConstraints:
+      tolerations:
+        - key: role-storage
+          operator: Equal
+          value: "rook-node"
+          effect: "NoSchedule"
+    osd: # OSD only created on nodes with 'rook-osd-node'
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: role-rook-osd
+              operator: In
+              values:
+              - rook-osd-node
+  storage: # cluster level storage configuration and selection
+    useAllNodes: true
+    useAllDevices: false
+    # rbd=rados block device
+    # cfs=Ceph Filesystem
+    devices:
+      - name: "sdc"
+        config:
+          deviceClass: "ssd-rbd"
+      - name: "sdd"
+        config:
+          deviceClass: "hdd-rbd"
+      - name: "sde"
+        config:
+          deviceClass: "hdd-cfs"
+      - name: "sdf"
+        config:
+          deviceClass: "ssd-mgrmeta"
+
+# -- Enable an ingress for the ceph-dashboard
+ingress:
+  dashboard:
+    annotations:
+      ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/proxy-body-size: 10m
+      nginx.ingress.kubernetes.io/proxy-read-timeout: 60s
+      nginx.ingress.kubernetes.io/proxy-send-timeout: 60s
+    host:
+      name: cdak8clst100-rook-ceph-ceph.abiwot-lab.com
+      path: /
+    ingressClassName: nginx
+
+# -- A list of CephBlockPool configurations to deploy
+cephBlockPools:
+  - name: replicapool-hdd
+    spec:
+      failureDomain: host
+      replicated:
+        size: 3
+      deviceClass: hdd-rbd
+      enableRBDStats: true
+    storageClass:
+      enabled: true
+      name: rookceph-rbd-hdd
+      isDefault: true #default storageclass if not specified
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: "Immediate"
+      mountOptions: []
+      allowedTopologies: []
+      parameters:
+        imageFormat: "2"
+        imageFeatures: layering,fast-diff,object-map,deep-flatten,exclusive-lock
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+        csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/fstype: ext4
+  
+  - name: replicapool-ssd
+    spec:
+      failureDomain: host
+      replicated:
+        size: 3
+      deviceClass: ssd-rbd
+      enableRBDStats: true
+    storageClass:
+      enabled: true
+      name: rookceph-rbd-ssd
+      isDefault: false
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: "Immediate"
+      mountOptions: []
+      allowedTopologies: []
+      parameters:
+        imageFormat: "2"
+        imageFeatures: layering,fast-diff,object-map,deep-flatten,exclusive-lock
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+        csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/fstype: ext4
+  
+  - name: replicapool-mgrmeta
+    spec:
+      failureDomain: host
+      replicated:
+        size: 3
+      deviceClass: ssd-mgrmeta
+      enableRBDStats: true
+    # storageClass:
+    #   enabled: true
+    #   name: rookceph-mgrmeta-ssd
+    #   isDefault: false
+    #   reclaimPolicy: Retain
+    #   allowVolumeExpansion: true
+    #   volumeBindingMode: "Immediate"
+    #   mountOptions: []
+    #   allowedTopologies: []
+    #   parameters:
+    #     imageFormat: "2"
+    #     imageFeatures: layering,fast-diff,object-map,deep-flatten,exclusive-lock
+    #     csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+    #     csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+    #     csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+    #     csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+    #     csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+    #     csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+    #     csi.storage.k8s.io/fstype: xfs
+
+# -- A list of CephFileSystem configurations to deploy
+cephFileSystems:
+  - name: cephfspool-hdd
+    spec:
+      metadataPool:
+        deviceClass: hdd-cfs
+        replicated:
+          size: 3
+      dataPools:
+        - failureDomain: host
+          replicated:
+            size: 3
+          # Optional and highly recommended, 'data0' by default, see https://github.com/rook/rook/blob/v1.15.2/Documentation/CRDs/Shared-Filesystem/ceph-filesystem-crd.md#pools
+          name: data0
+      metadataServer:
+        activeCount: 1
+        activeStandby: true
+        resources:
+          limits:
+            memory: "4Gi"
+          requests:
+            cpu: "1000m"
+            memory: "4Gi"
+        priorityClassName: system-cluster-critical
+    storageClass:
+      enabled: true
+      isDefault: false
+      name: rookceph-cfs-hdd
+      # (Optional) specify a data pool to use, must be the name of one of the data pools above, 'data0' by default
+      pool: data0
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: "Immediate"
+      annotations: {}
+      labels: {}
+      mountOptions: []
+      parameters:
+        # The secrets contain Ceph admin credentials.
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+        csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+        # Specify the filesystem type of the volume. If not specified, csi-provisioner
+        # will set default as `ext4`. Note that `xfs` is not recommended due to potential deadlock
+        # in hyperconverged settings where the volume is mounted on the same node as the osds.
+        csi.storage.k8s.io/fstype: ext4
+
+# -- Settings for the filesystem snapshot class
+cephFileSystemVolumeSnapshotClass:
+  enabled: true
+  name: ceph-filesystem
+  isDefault: true
+  deletionPolicy: Delete
+  annotations: {}
+  labels: {}
+  parameters: {}
+
+# -- Settings for the block pool snapshot class
+cephBlockPoolsVolumeSnapshotClass:
+  enabled: true
+  name: ceph-block
+  isDefault: false
+  deletionPolicy: Delete
+  annotations: {}
+  labels: {}
+  parameters: {}
+
+# -- A list of CephObjectStore configurations to deploy
+# Do not create
+cephObjectStores: []
+
+...

@@ -1,0 +1,87 @@
+# helm-cert-manager-override-values.yaml
+---
+#GLOBAL
+global:
+  priorityClassName: system-cluster-critical
+
+#Cert_Manager
+replicaCount: 2
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+resources:
+  requests:
+    cpu: "10m"
+    memory: 32Mi
+  limits:
+    cpu: "200m"
+    memory: 1Gi
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - cert-manager
+        topologyKey: "kubernetes.io/hostname"
+
+#Webhook
+webhook:
+  replicaCount: 3
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  resources:
+    requests:
+      cpu: "10m"
+      memory: 32Mi
+    limits:
+      cpu: "100m"
+      memory: 500Mi
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - webhook
+          topologyKey: "kubernetes.io/hostname"
+
+#Cainjector
+cainjector:
+  extraArgs:
+    - --namespace=cert-manager
+    - --enable-certificates-data-source=false
+  replicaCount: 2
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  resources:
+    requests:
+      cpu: "10m"
+      memory: 32Mi
+    limits:
+      cpu: "100m"
+      memory: 500Mi
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - caininjector
+          topologyKey: "kubernetes.io/hostname"
+
+...
