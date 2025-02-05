@@ -12,15 +12,15 @@ This deployment is using a "stacked" control-plane model.  Basically each contro
 - kube-proxy pod
 - etcd pod
 
-The etcd works as a clustered key-value database and contains the configs and state of the custer.
+The etcd is as a clustered key-value database that contains the configs and state of the cluster.
 
 ### High Availability (HA) - Things to Consider
 
-One of the main points of a containerized environment is its ability to suffer outages (planned and unplanned) and keep functioning.  I will address a few of the topics to be aware and and take precautions to carefully plan for.
+One of the main points of a containerized environment is its ability to suffer outages (planned and unplanned) and keep functioning.  Lets address some of the topics to be aware of and carefully plan for.
 
 #### Control-plane Availability
 
-The control-plane nodes are essentially the brains of the cluster.  This is where all the decision making occurs to deploy, manage, secure, schedule, and recover.  In your environment, you have to ensure the control-plane nodes are operational and you have a "quorum" for the etcd database (keeps all the configs & state of your cluster).
+The control-plane nodes are essentially the brains of the cluster.  This is where all the decision making occurs to deploy, manage, secure, schedule, and recover.  In your environment, you have to ensure the control-plane nodes are operational and have a "quorum" for the etcd database (keeps all the configs & state of your cluster).
 "etcd" uses Raft consensus to ensure quorum.  Raft works best with odd number deployments (3,5,7).  The formula used for quorum is:
 
 $N/2 + 1$
@@ -29,7 +29,7 @@ $N/2 + 1$
 - 5 x control-plane nodes => can suffer 2 nodes lost
 - 7 x control-plane nodes => can suffer 3 nodes lost
 
-Once you lose etcd quorum, that database goes into a read-only mode and not allowing any changes to your cluster to occur; until quorum is restored.
+Once you lose etcd quorum, that database goes into a read-only mode, not allowing any changes to your cluster to occur until quorum is restored.
 
 ##### Availability Zones (AZ) / Fault Domains (FD)
 
@@ -37,14 +37,15 @@ When planning your control-plane deployment, make sure you understand the impact
 
 - etcd quorum
   - If you split odd number of control-plane nodes across even number of AZ/FD; then you create a HA imbalance.
-    - zone1: has 1 node zone2: has 2 nodes
-    - When zone1 fails = quorum exists and etcd is operational
+    - zone1: 1 node
+    - zone2: 2 nodes
+    - when zone1 fails = quorum exists and etcd is operational
     - when zone2 fails != quorum fails and etcd is read-only
 
 ##### Control-plane I/O (throughput performance)
 
-The control-plane I/O (throughput performance = how many requests/actions per second) is another consideration, especially for med-large size clusters.  A big concern for medium - large size clusters is the amount of requests being pushed to the API and etcd pods.  If these pods start to suffer from resource starvation, then the performance will be felt in many actions across the entire cluster.
-This is also important when running in a degraded control-plane state (nodes are down for maintenance or outage).  With less nodes to process the I/O demand, you can overwhelm the management side.
+The control-plane I/O (throughput performance = how many requests/actions per second) is another consideration, especially for medium to large size clusters.  A big concern for medium - large size clusters is the amount of requests being pushed to the API and etcd pods.  If these pods start to suffer from resource starvation, then the performance will be felt in many actions across the entire cluster.
+This is important when running in a degraded control-plane state (nodes are down for maintenance or outage).  With less nodes to process the I/O demand, you can overwhelm the management side.
 
 #### Storage Node Availability
 
@@ -55,9 +56,9 @@ Would recommend 4+ storage nodes for any production deployment, from a safety po
 
 #### Impact Radius for Worker Nodes
 
-Consider the resource size (cpu & memory) of your K8s worker nodes.  You might be tempted to build very large nodes to hold 200+ pods each.  Keep in mind when you have to drain that node for maintenance or the node fails; the impact to the applications running on those 200+ pods might be detrimental to the availability.  Better to keep the impact of a node loss to minimal impact.  The sizes will depend on your application fault tolerance, infrastructure, K8s recovery (replicasets, statefulsets), K8s admins, etc...
+Consider the resource size (cpu & memory) of your K8s worker nodes.  You might be tempted to build very large nodes to hold 100+ pods each.  Keep in mind when you have to drain that node for maintenance or when nodes fail; the impact might be detrimental to the application's availability running on those 100+ pods.  Better to keep the impact of a node loss to minimal impact.  The sizes will depend on your application fault tolerance, infrastructure, K8s recovery (replicasets, statefulsets), K8s admins, etc...
 As of K8s v1.32, the [recommendations](https://kubernetes.io/docs/setup/best-practices/cluster-large/) are:
 
-- No more than 110 pods per node
-- No more than 5K nodes per cluster
-- No more than 150K total pods
+- <= 110 pods per node
+- <= 5K nodes per cluster
+- < 150K total pods
