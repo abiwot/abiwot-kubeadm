@@ -58,6 +58,10 @@ git clone https://github.com/abiwot/abiwot-kubeadm.git
 3. Set kernel parameters (see [Kernel Notes](#kernel-notes)) for details
 4. Restart keepalived service
 
+**Note**:
+
+Your network interface name within the OS might be different.  If so, then you need to adjust the values in *keepalived.conf* & */etc/sysctl.conf*
+
 ```shell
 cd $HOME/projects/k8s/abiwot-kubeadm/load-balancer/keepalived/<corresponding host folder>
 sudo cp keepalived.conf /etc/keepalived/
@@ -70,8 +74,8 @@ sudo tee -a /etc/sysctl.conf <<EOF
 net.ipv4.ip_nonlocal_bind=1
 net.ipv4.conf.all.arp_ignore=1
 net.ipv4.conf.all.arp_announce=2
-net.ipv4.conf.ens192.arp_ignore=1
-net.ipv4.conf.ens192.arp_announce=2
+net.ipv4.conf.ens256.arp_ignore=1
+net.ipv4.conf.ens256.arp_announce=2
 
 EOF
 
@@ -95,13 +99,43 @@ Brief explanation of what each of the kernel parameters are for.
 
 ### NGINX Configurations
 
+#### SSL Certificates for LB
+
+You should have SSL certificates for your internal domain on the LBs for verification of traffic.  I would recommend using trusted (real) certificates.  
+Just make sure you modify the K8s NGINX config file for those certificates.
+
+For this deployment, you can create some self-signed certificates to be used, as-is.
+
+1. Navigate to $HOME/projects/k8s/abiwot-kubeadm/load-balancer/tools/
+2. Use the bash_create_ssl_selfsigned.sh script to create a full chain
+3. Ensure those certs are in the correct locations for NGINX to use
+
+```shell
+cd $HOME/projects/k8s/abiwot-kubeadm/load-balancer/tools/
+sudo chmod +x bash_create_ssl_selfsigned.sh
+sudo ./bash_create_ssl_selfsigned.sh -d abiwot-lab.com -o /etc/pki/nginx/abiwot-lab.com/
+ls -lah /etc/pki/nginx/abiwot-lab.com/
+```
+
+#### K8s NGINX Configuration
+
 1. Make NGINX configuration folder structure
 2. Copy root NGINX configuration file
 3. Copy K8s NGINX configuration file
 
 ```shell
 sudo mkdir -p /etc/nginx/conf.d/k8s/http
+sudo mkdir -p /etc/nginx/conf.d/k8s/stream
 cd $HOME/projects/k8s/abiwot-kubeadm/load-balancer/nginx
 sudo cp nginx.conf /etc/nginx/
 sudo cp https_k8clst100.conf /etc/nginx/conf.d/k8s/http/
+sudo cp stream_k8clst100.conf /etc/nginx/conf.d/k8s/stream/
+```
+
+4. Test the NGINX configs
+5. Apply the NGINX configs
+
+```shell
+sudo nginx -t
+sudo nginx -s reload
 ```
