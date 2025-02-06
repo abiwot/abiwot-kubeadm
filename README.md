@@ -23,6 +23,6 @@ If your intention is to gain a better understanding, advise after each section t
 - See [NOTES](NOTES.md)
   - Covers background topics in a very high-level for additional knowledge or considerations while designing
 
-## Kubernetes Environment
+## Kubernetes Framework Environment
 
 ![Kubernetes Infrastructure](diagrams/kubeadm-infrastructure.drawio.svg)

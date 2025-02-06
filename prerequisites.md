@@ -6,7 +6,7 @@ These are the requirements to ensure the environment/infrastructure is configure
 
 - Software
   - OS: Ubuntu >=24.04
-    - All OS based components are designed to be using Ubuntu
+    - All OS based components are designed to use Ubuntu
 - Hardware
   - Control-plane nodes
     - For high-availability (HA) considerations, see [NOTES](NOTES.md#high-availability-ha---things-to-consider)
