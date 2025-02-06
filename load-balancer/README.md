@@ -2,7 +2,7 @@
 
 As mentioned before, you need to have an external (from the K8s cluster perspective) that is responsible to be the aggregation layer for K8s inbound communications and ingress to exposed services.
 
-This deployment will depict a cluster of NGINX load-balancers.  The configs provided are purely for convience and not an example of a production level NGINX LB deployment.
+This deployment will depict a cluster of NGINX load-balancers.  The configs provided are purely for convenance and not an example of a production level NGINX LB deployment.
 
 ## Load-balancer Design Layout
 
@@ -17,17 +17,18 @@ See ![Diagram](../diagrams/kubeadm-infrastructure.drawio.svg)
   - Memory = 2-4GB
   - Storage = 50-100GB
 - DNS Records
-  - See [Diagram](#load-balancer-design-layout).  The DNS Entries chart has the necessary records needed.
+  - See [Diagram](#load-balancer-design-layout).  The DNS Entries chart has the necessary records needed
 
 ## Load-balancer Build Configuration
 
 ### Package Installations
 
 1. These tasks need to be completed on **BOTH** LBs
-2. Run ```sudo apt update && sudo apt upgrade -y```
+2. Install OS security and base package upgrades
 3. Install support packages
 
 ```shell
+sudo apt update && sudo apt upgrade -y
 sudo apt install curl wget git -y
 ```
 
@@ -35,18 +36,29 @@ sudo apt install curl wget git -y
     1. At this time of writing this, application versions were:
         1. NGINX = 1.26.2
         2. Keepalived = 2.2.8
+5. Configure NGINX APT repository
 
 ```shell
-sudo apt install nginx keepalived -y
-sudo apt mark-hold nginx keepalived
+sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
+curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" \
+    | sudo tee /etc/apt/preferences.d/99nginx
+```
+
+```shell
+sudo apt update && sudo apt install nginx keepalived -y
+sudo apt-mark hold nginx keepalived
 ```
 
 5. Git clone abiwot-kubeadm
 
 ```shell
-mkdir -p $HOME/projects/k8s
-cd $HOME/projects/k8s
-git clone https://github.com/abiwot/abiwot-kubeadm.git
+mkdir -p $HOME/projects/k8s && cd $HOME/projects/k8s
+git clone --single-branch --branch main https://github.com/abiwot/abiwot-kubeadm.git
 ```
 
 ### Keepalived Configuration
@@ -108,6 +120,8 @@ For this deployment, you can create some self-signed certificates to be used, as
 
 1. Navigate to $HOME/projects/k8s/abiwot-kubeadm/load-balancer/tools/
 2. Use the bash_create_ssl_selfsigned.sh script to create a full chain
+    1. NOTE: **you create the SSL certs on one LB and then copy those certs to the second LB!!!**
+    2. Copy created certs to secondary LB (same folder locations)
 3. Ensure those certs are in the correct locations for NGINX to use
 
 ```shell
@@ -132,10 +146,12 @@ sudo cp https_k8clst100.conf /etc/nginx/conf.d/k8s/http/
 sudo cp stream_k8clst100.conf /etc/nginx/conf.d/k8s/stream/
 ```
 
-4. Test the NGINX configs
-5. Apply the NGINX configs
+4. Make "nginx" user
+5. Test the NGINX configs
+6. Apply the NGINX configs
 
 ```shell
+sudo useradd -r -d /nonexistent -s /usr/sbin/nologin -c "nginx user" nginx
 sudo nginx -t
 sudo nginx -s reload
 ```
