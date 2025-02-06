@@ -1,8 +1,8 @@
-## Kubeadm Cluster Deployment Prerequisites
+# Kubeadm Cluster Deployment Prerequisites
 
 These are the requirements to ensure the environment/infrastructure is configured in preparation for deployment.
 
-### System Requirements
+## System Requirements
 
 - Software
   - OS: Ubuntu >=24.04
@@ -53,13 +53,13 @@ These are the requirements to ensure the environment/infrastructure is configure
           - see note below about /var/log/pods
       - Network = >=10Gb
 
-#### NOTE: Mount point for **/var**
+### NOTE: Mount point for **/var**
 
 Recommended putting /var onto a separate dedicated disk.  This allows for easier management when host systems get busy/full with pods.  The /var/log/pods is the default location for Kubernetes pod logs.  If you mount this directory onto a separate disk/device/partition from where /var is mounted, kubelet will no longer be able to monitor disk space usage.  Recommended to keep the entire /var together.
 
 - Reference: [Cluster-Administration-Logging](https://kubernetes.io/docs/concepts/cluster-administration/logging/#log-location-node)
 
-### Kubernetes Aggregation Layer (Load-balancer)
+## Kubernetes Aggregation Layer (Load-balancer)
 
 To ensure you can always access the K8s API (residing on the control-plane nodes), you need to have a load-balancer (LB) mechanism external to the cluster.  The aggregation layer is also responsible for the control-plane to reach each others API and etcd.  
 
@@ -71,7 +71,7 @@ This project is not intended to provide production level instructions on setting
 
 See [load-balancer-README](load-balancer/README.md)
 
-### DNS Records (internal)
+## DNS Records (internal)
 
 There are DNS records required prior to deployment.  These DNS records are for internal (not public facing) intra-node communications and ability to expose some UI/services externally from the K8s cluster.
 
