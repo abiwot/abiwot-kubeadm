@@ -10,6 +10,7 @@ installation:
       - cidr: <pod subnet> #pod CIDR set in K8s ClusterConfiguration
         blockSize: <pod subnet mask bits> # int32 size of the IP block sizes to allocate
         encapsulation: VXLAN
+  nodeMetricsPort: 9091
 
 apiServer:
   enabled: true
