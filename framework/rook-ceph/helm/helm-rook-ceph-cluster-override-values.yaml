@@ -55,7 +55,7 @@ cephClusterSpec:
           deviceClass: "hdd-cfs"
       - name: "sdf"
         config:
-          deviceClass: "ssd-mgrmeta"
+          deviceClass: "ssd-builtin-mgr"
 
 # -- Enable an ingress for the ceph-dashboard
 ingress:
@@ -129,32 +129,21 @@ cephBlockPools:
         csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
         csi.storage.k8s.io/fstype: ext4
   
-  - name: replicapool-mgrmeta
+  - name: builtin-mgr
     spec:
+      name: .mgr
       failureDomain: host
       replicated:
         size: 3
-      deviceClass: ssd-mgrmeta
+        requireSafeReplicaSize: true
+      deviceClass: ssd-builtin-mgr
       enableRBDStats: true
-    # storageClass:
-    #   enabled: true
-    #   name: rookceph-mgrmeta-ssd
-    #   isDefault: false
-    #   reclaimPolicy: Retain
-    #   allowVolumeExpansion: true
-    #   volumeBindingMode: "Immediate"
-    #   mountOptions: []
-    #   allowedTopologies: []
-    #   parameters:
-    #     imageFormat: "2"
-    #     imageFeatures: layering,fast-diff,object-map,deep-flatten,exclusive-lock
-    #     csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
-    #     csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
-    #     csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
-    #     csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
-    #     csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
-    #     csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
-    #     csi.storage.k8s.io/fstype: xfs
+      parameters:
+        compression_mode: none
+      mirroring:
+        enabled: false
+    storageClass:
+      enabled: false
 
 # -- A list of CephFileSystem configurations to deploy
 cephFileSystems:
