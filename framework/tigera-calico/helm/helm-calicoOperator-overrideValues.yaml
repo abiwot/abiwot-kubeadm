@@ -5,13 +5,30 @@ installation:
   cni:
     type: Calico
   calicoNetwork:
-    bgp: Disabled
+    # BGP considerations:
+    # - If you intend to connect two K8s clusters with Submariner, set bgp to Disabled.
+    # - If you are using Calico for BGP peering with your top-of-rack switches, set bgp to Enabled.
+    bgp: <Disabled | Enabled>
+
+    # IPPools define the IP address ranges that Calico assigns to pods.
     ipPools:
       - cidr: <pod subnet> #pod CIDR set in K8s ClusterConfiguration
         blockSize: <pod subnet mask bits> # int32 size of the IP block sizes to allocate
-        encapsulation: VXLAN
-  nodeMetricsPort: 9091
 
+        # Encapsulation type for the IP pool. Can be one of: VXLAN, IPIP, IPIPCrossSubnet, or None.
+        # - If BGP is disabled, set to VXLAN
+        # - If BGP is enabled, remove/omit this field.  Encapsulation will default to IPIP.
+        encapsulation: <VXLAN>
+
+  # Configure the Prometheus metrics port for Typha component
+  typhaMetricsPort: 9093
+
+# Enable Prometheus metrics for Felix component
+defaultFelixConfiguration:
+  enabled: true
+  prometheusMetricsEnabled: true
+
+# Enable the Calico API server
 apiServer:
   enabled: true
 
