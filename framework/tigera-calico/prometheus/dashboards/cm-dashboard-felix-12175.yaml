@@ -1560,7 +1560,7 @@ data:
 kind: ConfigMap
 metadata:
   creationTimestamp: null
-  name: felix-dashboard-12175
+  name: cm-dashboard-felix-12175
   namespace: monitoring
   labels:
     grafana_dashboard: "1"

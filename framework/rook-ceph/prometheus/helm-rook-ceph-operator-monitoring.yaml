@@ -1,0 +1,12 @@
+---
+csi:
+  enableLiveness: true # enable sidecar liveness probe
+  # deploy service-monitor for CSI metrics
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: kube-prometheus
+    namespace: monitoring
+monitoring:
+  enabled: true
+...

@@ -1,0 +1,31 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sm-patcher
+  namespace: rook-ceph
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: servicemonitor-patch-role
+  namespace: rook-ceph
+rules:
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["servicemonitors"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: servicemonitor-patch-rolebinding
+  namespace: rook-ceph
+subjects:
+  - kind: ServiceAccount
+    name: sm-patcher
+    namespace: rook-ceph
+roleRef:
+  kind: Role
+  name: servicemonitor-patch-role
+  apiGroup: rbac.authorization.k8s.io
+...

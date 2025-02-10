@@ -1,0 +1,10 @@
+---
+monitoring:
+  enabled: true
+  createPrometheusRules: true # create Prometheus alerting rules
+  rulesNamespaceOverride: "monitoring" # namespace where Prometheus is installed
+  prometheusRule:
+    # kube-prometheus-stack needs this label to find the rules
+    labels:
+      release: kube-prometheus
+...
