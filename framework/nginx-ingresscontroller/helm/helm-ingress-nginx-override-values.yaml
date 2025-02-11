@@ -33,6 +33,19 @@ controller:
         #31671: 31671
         #31674: 31674
         #31673: 31673
+  config:
+    enable-brotli: "true"
+    log-format-upstream: '[$time_local] "STATUS:" $status "REQUEST:" $request "REMOTE_ADDR:"
+      $remote_addr:$remote_port "CONN#" $connection "PROTOCOL:" $server_protocol "REFERER:"
+      $http_referer "FORWARDED:" $http_x_forwarded_for "PROXYUPSTREAM:" $proxy_upstream_name
+      "UPSTREAMADDR:" $upstream_addr "B_SENT:" $bytes_sent "REQUEST_TIME:" $request_time
+      "USERAGENT:" $http_user_agent'
+    proxy-buffer-size: "16k"
+    proxy-http-version: "1.1"
+    proxy-read-timeout: "3600"
+    proxy-request-buffering: "off"
+    proxy-send-timeout: "3600"
+    use-http2: "true"
 tcp:
 # Uncomment the corresponding namespace:port the cluster will use
   #<port>: "<namespace/service name>:<port>"

@@ -1,0 +1,60 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: patch-servicemonitors-metrics
+  namespace: rook-ceph
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  successfulJobsHistoryLimit: 10  # Keep only the last X successful jobs
+  failedJobsHistoryLimit: 10  # Keep only the last X failed job
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: sm-patcher
+          restartPolicy: Never
+          containers:
+            - name: patch-servicemonitor
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Checking ServiceMonitor labels..."
+
+                  # Function to retry commands
+                  retry() {
+                    local n=1
+                    local max=5
+                    local delay=5
+                    while true; do
+                      "$@" && break || {
+                        if [[ $n -lt $max ]]; then
+                          ((n++))
+                          echo "Attempt $n/$max failed. Retrying in $delay seconds..."
+                          sleep $delay
+                        else
+                          echo "Command failed after $n attempts."
+                          return 1
+                        fi
+                      }
+                    done
+                  }
+
+                  # Get current labels for rook-ceph-exporter
+                  current_label=$(kubectl get servicemonitor rook-ceph-exporter -n rook-ceph -o jsonpath='{.metadata.labels.release}')
+                  if [ "$current_label" != "kube-prometheus" ]; then
+                    echo "Fixing labels for rook-ceph-exporter..."
+                    retry kubectl patch servicemonitor rook-ceph-exporter -n rook-ceph --type='merge' -p '{"metadata":{"labels":{"release":"kube-prometheus"}}}'
+                  fi
+
+                  # Get current labels for rook-ceph-mgr
+                  current_label=$(kubectl get servicemonitor rook-ceph-mgr -n rook-ceph -o jsonpath='{.metadata.labels.release}')
+                  if [ "$current_label" != "kube-prometheus" ]; then
+                    echo "Fixing labels for rook-ceph-mgr..."
+                    retry kubectl patch servicemonitor rook-ceph-mgr -n rook-ceph --type='merge' -p '{"metadata":{"labels":{"release":"kube-prometheus"}}}'
+                  fi
+
+                  echo "ServiceMonitor label check completed."
+...
