@@ -26,3 +26,5 @@ If your intention is to gain a better understanding, advise after each section t
 ## Kubernetes Framework Environment
 
 ![Kubernetes Infrastructure](diagrams/kubeadm-infrastructure.drawio.svg)
+
+![Service Exposuer](diagrams/kubeadm-infrastructure-service-exposure.drawio.svg)
