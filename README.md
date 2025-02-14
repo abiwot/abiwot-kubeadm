@@ -33,3 +33,7 @@ If your intention is to better understand:
 ![Kubernetes Infrastructure](diagrams/kubeadm-infrastructure.drawio.svg)
 
 ![Service Exposuer](diagrams/kubeadm-infrastructure-service-exposure.drawio.svg)
+
+## Build Configuration
+
+See [Docs](./docs/Kubeadm_Kubernetes_Framework_v0.9.0_final_v2.pdf)
