@@ -1,0 +1,10 @@
+# helm-cert-manager-monitoring-override-values.yaml
+---
+#Prometheus
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true
+    labels:
+      release: kube-prometheus
+...
