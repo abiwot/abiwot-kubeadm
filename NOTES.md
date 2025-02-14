@@ -2,6 +2,14 @@
 
 This document is to touch on some subjects that might require some clarifications and/or more in-depth explanations.  Keeping them out of the build document as not to add/cause any confusion.
 
+## Table of Contents
+
+- [Control-plane Architecture](#control-plane-architecture)
+- [High Availability (HA) - Things to Consider](#high-availability-ha---things-to-consider)
+  - [Control-plane Availability](#control-plane-availability)
+  - [Storage Node Availability](#storage-node-availability)
+  - [Impact Radius for Worker Nodes](#impact-radius-for-worker-nodes)
+
 ## Control-plane Architecture
 
 This deployment is using a "stacked" control-plane model.  Basically each control-plane node consists of:

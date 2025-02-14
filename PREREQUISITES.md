@@ -2,6 +2,12 @@
 
 These are the requirements to ensure the environment/infrastructure is configured in preparation for deployment.
 
+## Table of Contents
+
+- [System Requirements](#system-requirements)
+- [Kubernetes Aggregation Layer (Load-balancer)](#kubernetes-aggregation-layer-load-balancer)
+- [DNS Records (internal)](#dns-records-internal)
+
 ## System Requirements
 
 - Software

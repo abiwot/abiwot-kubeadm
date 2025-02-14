@@ -20,8 +20,6 @@ These are the different components that make up this K8s deployment.  Below is a
 | kube-pormetheus-stack | helm | 0.79.2 | 68.4.3 |
 | kubernetes-dashboard | helm | 7.10.4 | 7.10.4 |
 | cert-manager | helm | 1.16.2 | 1.16.2 |
-| k8spacket | helm | 2.1.5 | 2.1.5 |
-
 
 ### Component Deployment Minimal
 
@@ -34,4 +32,4 @@ If you are using this deployment for testing/learning, then these 2 components a
 
 ### System Requirements
 
-See [Prequisites](../prerequisites.md#system-requirements)
+See [PREQUISITES](../PREREQUISITES.md#system-requirements)

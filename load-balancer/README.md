@@ -4,6 +4,15 @@ As mentioned before, you need to have an external (from the K8s cluster perspect
 
 This deployment will depict a cluster of NGINX load-balancers.  The configs provided are purely for convenance and not an example of a production level NGINX LB deployment.
 
+## Table of Contents
+
+- [Load-balancer Design Layout](#load-balancer-design-layout)
+- [System Requirements](#system-requirements)
+- [Load-balancer Build Configuration](#load-balancer-build-configuration)
+  - [Package Installations](#package-installations)
+  - [Keepalived Configuration](#keepalived-configuration)
+  - [NGINX Configurations](#nginx-configurations)
+
 ## Load-balancer Design Layout
 
 See ![Diagram](../diagrams/kubeadm-infrastructure.drawio.svg)
