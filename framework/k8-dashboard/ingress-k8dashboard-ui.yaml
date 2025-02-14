@@ -8,8 +8,8 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-body-size: 10m
-    nginx.ingress.kubernetes.io/proxy-read-timeout: 60s
-    nginx.ingress.kubernetes.io/proxy-send-timeout: 60s
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
   name: k8-dashboard-ui-nodeport-expose
   namespace: kubernetes-dashboard
 spec:
