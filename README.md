@@ -36,4 +36,4 @@ If your intention is to better understand:
 
 ## Build Configuration
 
-See [Docs](./docs/Kubeadm_Kubernetes_Framework_v0.9.0_final_v2.pdf)
+Follow the [Kubeadm Kubernetes Framework](./docs/Kubeadm_Kubernetes_Framework_v0.9.0_final_v2.pdf) documentation.
