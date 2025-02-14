@@ -1,4 +1,4 @@
-# helm-calicoOperator-overrideValues.yaml
+# helm-calico-operator-override-values.yaml
 ---
 installation:
   enabled: true
