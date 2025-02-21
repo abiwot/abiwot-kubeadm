@@ -76,8 +76,9 @@ git clone --single-branch --branch main https://github.com/abiwot/abiwot-kubeadm
 
 1. Navigate to $HOME/projects/k8s/abiwot-kubeadm/load-balancer/keepalived/
 2. Copy keepalived.conf to /etc/keepalived/
-3. Set kernel parameters (see [Kernel Notes](#kernel-notes)) for details
-4. Restart keepalived service
+3. Copy keepalived track scripts to /etc/keepalived/scripts/
+4. Set kernel parameters (see [Kernel Notes](#kernel-notes)) for details
+5. Restart keepalived service
 
 **Note**:
 
@@ -86,6 +87,13 @@ Your network interface name within the OS might be different.  If so, then you n
 ```shell
 cd $HOME/projects/k8s/abiwot-kubeadm/load-balancer/keepalived/<corresponding host folder>
 sudo cp keepalived.conf /etc/keepalived/
+```
+
+```shell
+sudo mkdir -p /etc/keepalived/scripts
+cd $HOME/projects/k8s/abiwot-kubeadm/load-balancer/keepalived/scripts
+sudo cp *.sh /etc/keepalived/scripts/
+sudo chmod +x /etc/keepalived/scripts/*.sh
 ```
 
 ```shell
