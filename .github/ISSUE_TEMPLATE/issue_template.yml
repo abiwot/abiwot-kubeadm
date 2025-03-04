@@ -1,0 +1,125 @@
+name: Issue Report
+description: Report a bug, request a feature, or suggest documentation improvements.
+title: "[Issue Type] - Short Description"
+labels: ["needs-triage"]
+assignees: ""
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📝 Issue Guidelines
+        Please fill out the sections below with as much detail as possible. 
+        This will help us diagnose and address your issue effectively.
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: "Issue Type"
+      description: "Select the type of issue you're reporting."
+      options:
+        - Bug Report 🐛
+        - Feature Request ✨
+        - Documentation Update 📖
+        - Other (Specify Below)
+      multiple: false
+    validations:
+      required: true
+
+  - type: input
+    id: kubernetes_version
+    attributes:
+      label: "Kubernetes Version"
+      description: "Which Kubernetes version are you using?"
+      placeholder: "e.g., v1.32.1"
+    validations:
+      required: false
+
+  - type: input
+    id: kubeadm_version
+    attributes:
+      label: "kubeadm Version"
+      description: "Which kubeadm version are you using?"
+      placeholder: "e.g., v1.32.1"
+    validations:
+      required: false
+
+  - type: textarea
+    id: issue_description
+    attributes:
+      label: "Description"
+      description: "Provide a clear and concise description of the issue."
+      placeholder: "Explain the problem or feature request here."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "Expected Behavior"
+      description: "What should happen instead?"
+      placeholder: "Describe the expected outcome."
+    validations:
+      required: false
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: "Actual Behavior"
+      description: "What actually happens?"
+      placeholder: "Describe the observed issue."
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: "Steps to Reproduce"
+      description: "Provide a step-by-step guide to reproduce the issue."
+      placeholder: |
+        1. Run this command...
+        2. Modify this file...
+        3. Restart this service...
+        4. Observe the issue...
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logs or Error Messages"
+      description: "Paste relevant logs or error messages."
+      placeholder: "Include logs from `kubectl logs` or `journalctl` if relevant."
+    validations:
+      required: false
+
+  - type: textarea
+    id: possible_solution
+    attributes:
+      label: "Possible Solution"
+      description: "Do you have any ideas on how to fix this?"
+      placeholder: "Provide any hints or possible fixes."
+    validations:
+      required: false
+
+  - type: input
+    id: environment_details
+    attributes:
+      label: "Environment Details"
+      description: "OS, cloud provider, or any other relevant details."
+      placeholder: "e.g., Ubuntu 24.04, On-Prem VMware, etc."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: "Confirmation"
+      description: "Please check all that apply before submitting."
+      options:
+        - label: "I have searched for existing issues and discussions."
+          required: true
+        - label: "I have read the project's [CONTRIBUTING.md](https://github.com/abiwot/abiwot-kubeadm/blob/main/CONTRIBUTING.md)."
+          required: false
+        - label: "I am willing to submit a PR for this issue."
+          required: false
